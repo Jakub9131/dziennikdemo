@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Panel ucznia</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body onload="wczytajOceny()">
+  <div class="panel-box">
+    <button class="logout-button" onclick="wyloguj()">Wyloguj</button>
+    <h1>Panel ucznia</h1>
+    <div id="oceny">Ładowanie ocen...</div>
+    <h3 id="srednia"></h3>
+    <p id="blad"></p>
+  </div>
+
+  <script>
+    async function wczytajOceny() {
+      const id = localStorage.getItem("uczen_id");
+      if (!id) {
+        document.getElementById("oceny").textContent = "Brak ID użytkownika. Zaloguj się ponownie.";
+        return;
+      }
+
+      try {
+        const res = await fetch("http://localhost:5000/oceny/" + id);
+        const dane = await res.json();
+        const kontener = document.getElementById("oceny");
+        const sredniaDiv = document.getElementById("srednia");
+        kontener.innerHTML = "";
+
+        if (dane.length === 0) {
+          kontener.textContent = "Brak ocen.";
+          sredniaDiv.textContent = "";
+          return;
+        }
+
+        const przedmioty = [...new Set(dane.map(o => o.przedmiot))];
+        const ocenyWgPrzedmiot = {};
+        przedmioty.forEach(p => ocenyWgPrzedmiot[p] = []);
+        dane.forEach(o => {
+          ocenyWgPrzedmiot[o.przedmiot].push(o);
+        });
+
+        const tabela = document.createElement("table");
+        const header = document.createElement("tr");
+        header.innerHTML = "<th>Przedmiot</th><th>Oceny</th>";
+        tabela.appendChild(header);
+
+        przedmioty.forEach(p => {
+          const row = document.createElement("tr");
+          const tdName = document.createElement("td");
+          tdName.textContent = p;
+          const tdOceny = document.createElement("td");
+
+          ocenyWgPrzedmiot[p].forEach(oc => {
+            const span = document.createElement("span");
+            span.textContent = oc.wartosc;
+            span.setAttribute("data-kategoria", oc.kategoria);
+            tdOceny.appendChild(span);
+          });
+
+          row.appendChild(tdName);
+          row.appendChild(tdOceny);
+          tabela.appendChild(row);
+        });
+
+        kontener.appendChild(tabela);
+
+        const srednia = (
+          dane.reduce((acc, o) => acc + parseInt(o.wartosc), 0) / dane.length
+        ).toFixed(2);
+        sredniaDiv.textContent = "Średnia ocen: " + srednia;
+      } catch (e) {
+        document.getElementById("oceny").textContent = "Błąd podczas pobierania.";
+        console.error(e);
+      }
+    }
+
+    function wyloguj() {
+      localStorage.clear();
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>

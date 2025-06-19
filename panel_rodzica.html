@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel rodzica</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="parent-panel" onload="wczytajOceny()">
+  <div class="panel-box">
+    <button class="logout-button" onclick="wyloguj()">Wyloguj</button>
+
+    <h1>Panel rodzica</h1>
+    <div id="oceny">Ładowanie ocen...</div>
+    <h3 id="srednia"></h3>
+
+    <div class="kontakt">
+        <h2>Dane kontaktowe nauczycieli</h2>
+        <ul id="listaKontaktow"></ul>
+    </div>
+  </div>
+
+<script>
+async function wczytajOceny() {
+    const id = localStorage.getItem("rodzic_id");
+    if (!id) {
+        document.getElementById("oceny").textContent = "Brak ID użytkownika. Zaloguj się ponownie.";
+        return;
+    }
+
+    try {
+        const res = await fetch("http://localhost:5000/oceny_rodzica/" + id);
+        const dane = await res.json();
+        const kontener = document.getElementById("oceny");
+        const sredniaDiv = document.getElementById("srednia");
+        kontener.innerHTML = "";
+
+        if (dane.length === 0) {
+            kontener.textContent = "Brak ocen.";
+            sredniaDiv.textContent = "";
+            return;
+        }
+
+        const przedmioty = [...new Set(dane.map(o => o.przedmiot))];
+        const ocenyWgPrzedmiot = {};
+        przedmioty.forEach(p => ocenyWgPrzedmiot[p] = []);
+        dane.forEach(o => {
+            ocenyWgPrzedmiot[o.przedmiot].push(o);
+        });
+
+        const tabela = document.createElement("table");
+        const header = document.createElement("tr");
+        header.innerHTML = "<th>Przedmiot</th><th>Oceny</th>";
+        tabela.appendChild(header);
+
+        przedmioty.forEach(p => {
+            const row = document.createElement("tr");
+            const tdName = document.createElement("td");
+            tdName.textContent = p;
+            const tdOceny = document.createElement("td");
+
+            ocenyWgPrzedmiot[p].forEach(oc => {
+                const span = document.createElement("span");
+                span.textContent = oc.wartosc;
+                span.setAttribute("data-kategoria", `${oc.kategoria} - ${oc.nauczyciel}`);
+                tdOceny.appendChild(span);
+            });
+
+            row.appendChild(tdName);
+            row.appendChild(tdOceny);
+            tabela.appendChild(row);
+        });
+
+        kontener.appendChild(tabela);
+
+        const srednia = (dane.reduce((acc, o) => acc + parseInt(o.wartosc), 0) / dane.length).toFixed(2);
+        sredniaDiv.textContent = "Średnia ocen: " + srednia;
+
+        wczytajKontakty();
+    } catch (e) {
+        document.getElementById("oceny").textContent = "Błąd podczas pobierania.";
+        console.error(e);
+    }
+}
+
+async function wczytajKontakty() {
+    const res = await fetch("http://localhost:5000/nauczyciele");
+    const nauczyciele = await res.json();
+    const lista = document.getElementById("listaKontaktow");
+    lista.innerHTML = "";
+    nauczyciele.forEach(n => {
+        const li = document.createElement("li");
+        li.textContent = `${n.imie} ${n.nazwisko} — ${n.email}`;
+        lista.appendChild(li);
+    });
+}
+
+function wyloguj() {
+    localStorage.clear();
+    window.location.href = "index.html";
+}
+</script>
+</body>
+</html>

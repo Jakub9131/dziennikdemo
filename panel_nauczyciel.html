@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel nauczyciela</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="teacher-panel" onload="wczytajKlasy()">
+  <button class="logout-button" onclick="wyloguj()">Wyloguj</button>
+
+  <div class="teacher-container">
+    <h1>Panel nauczyciela</h1>
+
+    <label for="klasaSelect">Wybierz klasę:</label>
+    <select id="klasaSelect" onchange="wczytajUczniow()"></select>
+
+    <label for="uczenSelect">Wybierz ucznia:</label>
+    <select id="uczenSelect" onchange="wczytajOceny()"></select>
+
+    <div class="oceny-container" id="oceny"></div>
+
+    <label style="margin-top:20px;"><strong>Dodaj ocenę:</strong></label>
+    <select id="przedmiotSelect"></select>
+    <select id="wartoscInput">
+      <option value="1">1</option><option value="2">2</option>
+      <option value="3">3</option><option value="4">4</option>
+      <option value="5">5</option><option value="6">6</option>
+    </select>
+    <select id="kategoriaInput">
+      <option value="Sprawdzian">Sprawdzian</option>
+      <option value="Kartkówka">Kartkówka</option>
+      <option value="Odpowiedź ustna">Odpowiedź ustna</option>
+      <option value="Praca domowa">Praca domowa</option>
+    </select>
+    <button onclick="dodajOcene()">Dodaj</button>
+  </div>
+
+  <div id="modal">
+    <h3>Edytuj ocenę</h3>
+    <input type="hidden" id="editId">
+    <label>Ocena:</label>
+    <select id="editWartosc">
+      <option value="1">1</option><option value="2">2</option>
+      <option value="3">3</option><option value="4">4</option>
+      <option value="5">5</option><option value="6">6</option>
+    </select><br>
+    <label>Kategoria:</label>
+    <select id="editKategoria">
+      <option value="Sprawdzian">Sprawdzian</option>
+      <option value="Kartkówka">Kartkówka</option>
+      <option value="Odpowiedź ustna">Odpowiedź ustna</option>
+      <option value="Praca domowa">Praca domowa</option>
+    </select><br>
+    <button onclick="zapiszEdycje()">Zapisz</button>
+    <button onclick="zamknijModal()">Anuluj</button>
+  </div>
+
+  <script>
+    let nauczycielId = localStorage.getItem("nauczyciel_id");
+
+    async function wczytajKlasy() {
+      const res = await fetch("http://localhost:5000/klasy_nauczyciela/" + nauczycielId);
+      const klasy = await res.json();
+      const select = document.getElementById("klasaSelect");
+      select.innerHTML = "";
+      klasy.forEach(k => {
+        const opt = document.createElement("option");
+        opt.value = k.id;
+        opt.textContent = k.nazwa;
+        select.appendChild(opt);
+      });
+      wczytajUczniow();
+    }
+
+    async function wczytajUczniow() {
+      const klasaId = document.getElementById("klasaSelect").value;
+      const res = await fetch("http://localhost:5000/uczniowie/" + klasaId);
+      const uczniowie = await res.json();
+      const select = document.getElementById("uczenSelect");
+      select.innerHTML = "";
+      uczniowie.forEach(u => {
+        const opt = document.createElement("option");
+        opt.value = u.id;
+        opt.textContent = u.imie + " " + u.nazwisko;
+        select.appendChild(opt);
+      });
+      wczytajPrzedmioty();
+    }
+
+    async function wczytajPrzedmioty() {
+      const res = await fetch("http://localhost:5000/przedmioty");
+      const przedmioty = await res.json();
+      const select = document.getElementById("przedmiotSelect");
+      select.innerHTML = "";
+      przedmioty.forEach(p => {
+        const opt = document.createElement("option");
+        opt.value = p.id;
+        opt.textContent = p.nazwa;
+        select.appendChild(opt);
+      });
+      wczytajOceny();
+    }
+
+    async function wczytajOceny() {
+      const uczenId = document.getElementById("uczenSelect").value;
+      const res = await fetch("http://localhost:5000/oceny/" + uczenId);
+      const dane = await res.json();
+      const kontener = document.getElementById("oceny");
+      kontener.innerHTML = "";
+
+      dane.forEach(o => {
+        const el = document.createElement("div");
+        el.className = "ocena-box";
+        el.textContent = `${o.przedmiot}: ${o.wartosc}`;
+        el.setAttribute("data-kategoria", o.kategoria);
+        el.onclick = () => pokazModal(o.id, o.wartosc, o.kategoria);
+
+        const usun = document.createElement("span");
+        usun.className = "usun-btn";
+        usun.textContent = "✖";
+        usun.onclick = (e) => {
+          e.stopPropagation();
+          usunOcene(o.id);
+        };
+
+        el.appendChild(usun);
+        kontener.appendChild(el);
+      });
+    }
+
+    async function dodajOcene() {
+      const uczenId = document.getElementById("uczenSelect").value;
+      const przedmiotId = document.getElementById("przedmiotSelect").value;
+      const wartosc = document.getElementById("wartoscInput").value;
+      const kategoria = document.getElementById("kategoriaInput").value;
+
+      await fetch("http://localhost:5000/dodaj_ocene", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          uczen_id: uczenId, 
+          przedmiot_id: przedmiotId, 
+          wartosc, 
+          kategoria,
+          nauczyciel_id: nauczycielId
+        })
+      });
+      wczytajOceny();
+    }
+
+    async function usunOcene(id) {
+      await fetch("http://localhost:5000/usun_ocene/" + id, { method: "DELETE" });
+      wczytajOceny();
+    }
+
+    function pokazModal(id, wartosc, kategoria) {
+      document.getElementById("editId").value = id;
+      document.getElementById("editWartosc").value = wartosc;
+      document.getElementById("editKategoria").value = kategoria;
+      document.getElementById("modal").style.display = "block";
+    }
+
+    function zamknijModal() {
+      document.getElementById("modal").style.display = "none";
+    }
+
+    async function zapiszEdycje() {
+      const id = document.getElementById("editId").value;
+      const wartosc = document.getElementById("editWartosc").value;
+      const kategoria = document.getElementById("editKategoria").value;
+
+      await fetch("http://localhost:5000/edytuj_ocene/" + id, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wartosc, kategoria })
+      });
+      zamknijModal();
+      wczytajOceny();
+    }
+
+    function wyloguj() {
+      localStorage.clear();
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>

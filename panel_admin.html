@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Panel administratora</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="admin-panel" onload="initPanel()">
+  <button onclick="wyloguj()" class="logout-button">Wyloguj</button>
+
+  <div class="admin-container">
+    <h1>Panel administratora</h1>
+
+    <div>
+      <h2>Edytuj ucznia i rodzica</h2>
+      <label>Klasa:
+        <select id="klasaSelect" onchange="wczytajUczniow()"></select>
+      </label>
+      <label>Uczeń:
+        <select id="uczenSelect" onchange="wczytajDaneUcznia()"></select>
+      </label>
+      <div id="formularzUczen" class="hidden">
+        <h3>Dane ucznia</h3>
+        <label>Imię ucznia: <input id="u_imie"></label>
+        <label>Nazwisko ucznia: <input id="u_nazwisko"></label>
+        <label>Email ucznia: <input id="u_email"></label>
+        <label>ID klasy: <input id="u_klasa"></label>
+
+        <h3>Dane rodzica</h3>
+        <label>Imię rodzica: <input id="r_imie"></label>
+        <label>Nazwisko rodzica: <input id="r_nazwisko"></label>
+        <label>Email rodzica: <input id="r_email"></label>
+
+        <button onclick="zapiszZmianyUcznia()">Zapisz zmiany ucznia</button>
+        <button onclick="usunUcznia()">Usuń ucznia</button>
+      </div>
+    </div>
+
+    <hr>
+
+    <div>
+      <h2>Dodaj ucznia i rodzica</h2>
+      <label>Imię ucznia: <input id="du_imie"></label>
+      <label>Nazwisko ucznia: <input id="du_nazwisko"></label>
+      <label>Email ucznia: <input id="du_email"></label>
+      <label>Hasło ucznia: <input id="du_haslo" type="password"></label>
+      <label>ID klasy: <input id="du_klasa"></label>
+      <label>Imię rodzica: <input id="dr_imie"></label>
+      <label>Nazwisko rodzica: <input id="dr_nazwisko"></label>
+      <label>Email rodzica: <input id="dr_email"></label>
+      <label>Hasło rodzica: <input id="dr_haslo" type="password"></label>
+      <button onclick="dodajUcznia()">Dodaj ucznia i rodzica</button>
+    </div>
+
+    <hr>
+
+    <div>
+      <h2>Edytuj nauczyciela</h2>
+      <label>Nauczyciel:
+        <select id="nauczycielSelect" onchange="wczytajDaneNauczyciela()"></select>
+      </label>
+      <div id="formularzNauczyciel" class="hidden">
+        <label>Imię: <input id="n_imie"></label>
+        <label>Nazwisko: <input id="n_nazwisko"></label>
+        <label>Email: <input id="n_email"></label>
+        <label>Min klasa: <input id="n_min"></label>
+        <label>Max klasa: <input id="n_max"></label>
+        <button onclick="zapiszZmianyNauczyciela()">Zapisz zmiany nauczyciela</button>
+        <button onclick="usunNauczyciela()">Usuń nauczyciela</button>
+      </div>
+    </div>
+
+    <div>
+      <h2>Dodaj nauczyciela</h2>
+      <label>Imię: <input id="dn_imie"></label>
+      <label>Nazwisko: <input id="dn_nazwisko"></label>
+      <label>Email: <input id="dn_email"></label>
+      <label>Hasło: <input id="dn_haslo" type="password"></label>
+      <label>Min klasa: <input id="dn_min"></label>
+      <label>Max klasa: <input id="dn_max"></label>
+      <button onclick="dodajNauczyciela()">Dodaj nauczyciela</button>
+    </div>
+  </div>
+
+  <script>
+    let aktualnyUczen = {}, aktualnyNauczyciel = {};
+
+    function initPanel() {
+      wczytajKlasy();
+      wczytajNauczycieli();
+    }
+
+    async function wczytajKlasy() {
+      const res = await fetch("http://localhost:5000/klasy");
+      const klasy = await res.json();
+      const select = document.getElementById("klasaSelect");
+      select.innerHTML = "<option value=''>-- wybierz --</option>";
+      klasy.forEach(k => {
+        const opt = document.createElement("option");
+        opt.value = k.id;
+        opt.textContent = k.nazwa;
+        select.appendChild(opt);
+      });
+    }
+
+    async function wczytajUczniow() {
+      const klasaId = document.getElementById("klasaSelect").value;
+      const res = await fetch(`http://localhost:5000/uczniowie/${klasaId}`);
+      const uczniowie = await res.json();
+      const select = document.getElementById("uczenSelect");
+      select.innerHTML = "<option value=''>-- wybierz --</option>";
+      uczniowie.forEach(u => {
+        const opt = document.createElement("option");
+        opt.value = u.id;
+        opt.textContent = `${u.imie} ${u.nazwisko}`;
+        select.appendChild(opt);
+      });
+    }
+
+    async function wczytajDaneUcznia() {
+      const id = document.getElementById("uczenSelect").value;
+      if (!id) return;
+      const res = await fetch(`http://localhost:5000/admin/uczen/${id}`);
+      const dane = await res.json();
+      aktualnyUczen = dane;
+
+      u_imie.value = dane.imie_ucznia;
+      u_nazwisko.value = dane.nazwisko_ucznia;
+      u_email.value = dane.email_ucznia;
+      u_klasa.value = dane.klasa;
+
+      r_imie.value = dane.imie_rodzica || "";
+      r_nazwisko.value = dane.nazwisko_rodzica || "";
+      r_email.value = dane.email_rodzica || "";
+
+      document.getElementById("formularzUczen").classList.remove("hidden");
+    }
+
+    async function zapiszZmianyUcznia() {
+      const uczenId = aktualnyUczen.uczen_id;
+      const rodzicId = aktualnyUczen.rodzic_id;
+      await fetch(`http://localhost:5000/admin/edytuj_ucznia/${uczenId}`, {
+        method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pole: "imie", wartosc: u_imie.value })
+      });
+      await fetch(`http://localhost:5000/admin/edytuj_ucznia/${uczenId}`, {
+        method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pole: "nazwisko", wartosc: u_nazwisko.value })
+      });
+      await fetch(`http://localhost:5000/admin/edytuj_ucznia/${uczenId}`, {
+        method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pole: "email", wartosc: u_email.value })
+      });
+      await fetch(`http://localhost:5000/admin/edytuj_ucznia/${uczenId}`, {
+        method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pole: "klasa_id", wartosc: u_klasa.value })
+      });
+
+      if (rodzicId) {
+        await fetch(`http://localhost:5000/admin/edytuj_rodzica/${rodzicId}`, {
+          method: "PUT", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pole: "imie", wartosc: r_imie.value })
+        });
+        await fetch(`http://localhost:5000/admin/edytuj_rodzica/${rodzicId}`, {
+          method: "PUT", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pole: "nazwisko", wartosc: r_nazwisko.value })
+        });
+        await fetch(`http://localhost:5000/admin/edytuj_rodzica/${rodzicId}`, {
+          method: "PUT", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pole: "email", wartosc: r_email.value })
+        });
+      }
+
+      alert("Zapisano zmiany ucznia.");
+    }
+
+    async function usunUcznia() {
+      const id = aktualnyUczen.uczen_id;
+      if (confirm("Czy na pewno usunąć ucznia?")) {
+        await fetch(`http://localhost:5000/admin/usun_ucznia/${id}`, { method: "DELETE" });
+        alert("Usunięto ucznia");
+        location.reload();
+      }
+    }
+
+    async function dodajUcznia() {
+      const dane = {
+        imie: du_imie.value, nazwisko: du_nazwisko.value, email: du_email.value, haslo: du_haslo.value,
+        klasa_id: du_klasa.value,
+        imie_rodzica: dr_imie.value, nazwisko_rodzica: dr_nazwisko.value, email_rodzica: dr_email.value, haslo_rodzica: dr_haslo.value
+      };
+      await fetch("http://localhost:5000/admin/dodaj_ucznia", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dane)
+      });
+      alert("Dodano ucznia i rodzica");
+      location.reload();
+    }
+
+    async function wczytajNauczycieli() {
+      const res = await fetch("http://localhost:5000/nauczyciele");
+      const nauczyciele = await res.json();
+      const select = document.getElementById("nauczycielSelect");
+      select.innerHTML = "<option value=''>-- wybierz --</option>";
+      nauczyciele.forEach(n => {
+        const opt = document.createElement("option");
+        opt.value = n.id;
+        opt.textContent = `${n.imie} ${n.nazwisko}`;
+        select.appendChild(opt);
+      });
+    }
+
+    async function wczytajDaneNauczyciela() {
+      const id = document.getElementById("nauczycielSelect").value;
+      if (!id) return;
+      const res = await fetch(`http://localhost:5000/nauczyciel/${id}`);
+      const n = await res.json();
+      aktualnyNauczyciel = n;
+
+      n_imie.value = n.imie;
+      n_nazwisko.value = n.nazwisko;
+      n_email.value = n.email;
+      n_min.value = n.min_klasa;
+      n_max.value = n.max_klasa;
+
+      document.getElementById("formularzNauczyciel").classList.remove("hidden");
+    }
+
+    async function zapiszZmianyNauczyciela() {
+      const id = aktualnyNauczyciel.id;
+      for (const [pole, wartosc] of Object.entries({
+        imie: n_imie.value, nazwisko: n_nazwisko.value, email: n_email.value,
+        min_klasa: n_min.value, max_klasa: n_max.value
+      })) {
+        await fetch(`http://localhost:5000/admin/edytuj_nauczyciela/${id}`, {
+          method: "PUT", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pole, wartosc })
+        });
+      }
+      alert("Zapisano zmiany nauczyciela.");
+    }
+
+    async function usunNauczyciela() {
+      const id = aktualnyNauczyciel.id;
+      if (confirm("Czy na pewno usunąć nauczyciela?")) {
+        await fetch(`http://localhost:5000/admin/usun_nauczyciela/${id}`, { method: "DELETE" });
+        alert("Usunięto nauczyciela");
+        location.reload();
+      }
+    }
+
+    async function dodajNauczyciela() {
+      const dane = {
+        imie: dn_imie.value, nazwisko: dn_nazwisko.value,
+        email: dn_email.value, haslo: dn_haslo.value,
+        min_klasa: dn_min.value, max_klasa: dn_max.value
+      };
+      await fetch("http://localhost:5000/admin/dodaj_nauczyciela", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dane)
+      });
+      alert("Dodano nauczyciela");
+      location.reload();
+    }
+
+    function wyloguj() {
+      localStorage.clear();
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>

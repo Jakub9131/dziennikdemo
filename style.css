@@ -1,0 +1,682 @@
+/* Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Całe tło strony */
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #74ebd5, #9face6);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Kontener logowania */
+.login-box {
+  background: white;
+  padding: 40px 30px;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 400px;
+}
+
+/* Nagłówek */
+.login-box h1 {
+  text-align: center;
+  color: #333;
+  font-size: 24px;
+  margin-bottom: 25px;
+}
+
+/* Formularz */
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Etykiety */
+label {
+  margin-bottom: 6px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Pola formularza */
+input[type="email"],
+input[type="password"] {
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+/* Przycisk */
+button {
+  padding: 10px;
+  background-color: #4CAF50;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+/* Komunikat błędu */
+#blad {
+  color: red;
+  text-align: center;
+  margin-top: 10px;
+}
+
+/* ==================== STYL PANELU UCZNIA ==================== */
+.student-panel {
+  background: linear-gradient(135deg, #74ebd5, #9face6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 30px;
+}
+
+.panel-box {
+  background: white;
+  padding: 30px 40px;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  max-width: 700px;
+  width: 100%;
+  position: relative;
+}
+
+.panel-box h1 {
+  text-align: center;
+  color: #333;
+  margin-top: 0;
+  font-size: 24px;
+}
+
+#srednia {
+  text-align: center;
+  font-size: 18px;
+  margin-top: 20px;
+  color: #333;
+}
+
+#oceny table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+#oceny th, #oceny td {
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid #ccc;
+}
+
+#oceny th {
+  background-color: #f0f0f0;
+  font-weight: bold;
+}
+
+#oceny td span {
+  background: #e0e0e0;
+  padding: 5px 10px;
+  border-radius: 6px;
+  margin: 2px;
+  display: inline-block;
+  position: relative;
+}
+
+#oceny td span:hover::after {
+  content: attr(data-kategoria);
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: #fff;
+  padding: 5px 8px;
+  font-size: 12px;
+  border-radius: 4px;
+  white-space: nowrap;
+  z-index: 1;
+}
+
+.logout-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.logout-button:hover {
+  background-color: #45a049;
+}
+
+#blad {
+  color: red;
+  text-align: center;
+  margin-top: 10px;
+}
+/* ==================== STYL PANELU RODZICA ==================== */
+.parent-panel {
+  background: linear-gradient(135deg, #74ebd5, #9face6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 30px;
+}
+
+.parent-panel .panel-box {
+  background: white;
+  padding: 30px 40px;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  max-width: 700px;
+  width: 100%;
+  position: relative;
+}
+
+.parent-panel h1 {
+  text-align: center;
+  color: #333;
+  font-size: 24px;
+}
+
+#srednia {
+  text-align: center;
+  font-size: 18px;
+  margin-top: 20px;
+  color: #333;
+}
+
+#oceny table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+#oceny th, #oceny td {
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid #ccc;
+}
+
+#oceny th {
+  background-color: #f0f0f0;
+  font-weight: bold;
+}
+
+#oceny td span {
+  background: #e0e0e0;
+  padding: 5px 10px;
+  border-radius: 6px;
+  margin: 2px;
+  display: inline-block;
+  position: relative;
+}
+
+#oceny td span:hover::after {
+  content: attr(data-kategoria);
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: #fff;
+  padding: 5px 8px;
+  font-size: 12px;
+  border-radius: 4px;
+  white-space: nowrap;
+  z-index: 1;
+}
+
+/* Lista kontaktów */
+.kontakt {
+  margin-top: 30px;
+}
+
+.kontakt h2 {
+  text-align: center;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.kontakt ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.kontakt li {
+  padding: 8px 12px;
+  margin: 6px 0;
+  background: #f3f3f3;
+  border-left: 4px solid #4CAF50;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Przycisk wylogowania */
+.logout-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.logout-button:hover {
+  background-color: #45a049;
+}
+
+/* ==================== STYL PANELU NAUCZYCIELA ==================== */
+
+body.teacher-panel {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(to right, #b3d9ff, #dceeff);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.teacher-container {
+  background: white;
+  padding: 30px 40px;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.teacher-container h1 {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 24px;
+  text-align: center;
+}
+
+.teacher-container label {
+  font-weight: bold;
+  color: #333;
+  margin: 12px 0 5px;
+  align-self: flex-start;
+}
+
+.teacher-container select,
+.teacher-container input[type="text"],
+.teacher-container button {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  margin-bottom: 12px;
+}
+
+.teacher-container button {
+  background-color: #4CAF50;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.teacher-container button:hover {
+  background-color: #45a049;
+}
+
+.teacher-container .oceny-container {
+  margin: 20px 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ocena-box {
+  background: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  position: relative;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ocena-box:hover::after {
+  content: attr(data-kategoria);
+  position: absolute;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+.usun-btn {
+  margin-left: 10px;
+  color: red;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#modal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  z-index: 999;
+}
+/* ==================== STYL PANELU ADMINISTRATORA ==================== */
+body.admin-panel {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #74ebd5, #9face6);
+  min-height: 100vh;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.admin-container {
+  background: white;
+  padding: 30px 40px;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  width: 100%;
+}
+
+.admin-container h1,
+.admin-container h2,
+.admin-container h3 {
+  color: #333;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.admin-container label {
+  display: block;
+  margin: 10px 0 5px;
+  font-weight: bold;
+  color: #333;
+}
+
+.admin-container input,
+.admin-container select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.admin-container button {
+  padding: 10px 16px;
+  margin: 8px 0;
+  background-color: #4CAF50;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.admin-container button:hover {
+  background-color: #45a049;
+}
+
+.admin-container table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.admin-container th,
+.admin-container td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: left;
+}
+
+.admin-container hr {
+  margin: 40px 0;
+  border: none;
+  border-top: 1px solid #ccc;
+}
+
+.hidden {
+  display: none;
+}
+
+.logout-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.logout-button:hover {
+  background-color: #45a049;
+}
+@media (max-width: 768px) {
+  .admin-container {
+    padding: 20px;
+  }
+
+  .admin-container h1,
+  .admin-container h2,
+  .admin-container h3 {
+    font-size: 20px;
+  }
+
+  .admin-container label {
+    font-size: 14px;
+  }
+
+  .admin-container input,
+  .admin-container select {
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .admin-container button {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+
+  .admin-container table {
+    font-size: 14px;
+  }
+
+  .logout-button {
+    top: 10px;
+    right: 10px;
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-container {
+    padding: 15px;
+  }
+
+  .admin-container h1,
+  .admin-container h2,
+  .admin-container h3 {
+    font-size: 18px;
+  }
+
+  .admin-container label {
+    font-size: 13px;
+  }
+
+  .admin-container input,
+  .admin-container select,
+  .admin-container button {
+    font-size: 13px;
+  }
+
+  .admin-container table th,
+  .admin-container table td {
+    font-size: 13px;
+    padding: 6px;
+  }
+}
+@media (max-width: 768px) {
+  /* Panel ucznia i rodzica */
+  .student-panel,
+  .parent-panel {
+    padding: 20px;
+  }
+
+  .panel-box {
+    padding: 20px;
+  }
+
+  #oceny td span {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+
+  #oceny th, #oceny td {
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .kontakt li {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+
+  /* Panel nauczyciela */
+  body.teacher-panel {
+    padding: 20px 10px;
+  }
+
+  .teacher-container {
+    padding: 20px;
+  }
+
+  .teacher-container label {
+    font-size: 14px;
+  }
+
+  .teacher-container input,
+  .teacher-container select,
+  .teacher-container button {
+    font-size: 13px;
+    padding: 8px;
+  }
+
+  .ocena-box {
+    font-size: 13px;
+    padding: 6px 10px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ocena-box .usun-btn {
+    margin-left: 0;
+    margin-top: 5px;
+  }
+
+  #modal {
+    width: 90%;
+    padding: 20px;
+  }
+
+  /* Przycisk wylogowania */
+  .logout-button {
+    top: 10px;
+    right: 10px;
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+}
+@media (max-width: 480px) {
+  .login-box {
+    padding: 25px 20px;
+    border-radius: 8px;
+  }
+
+  .login-box h1 {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+
+  .login-box form label {
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+
+  .login-box input {
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .login-box button {
+    font-size: 15px;
+    padding: 10px;
+    margin-top: 10px;
+  }
+
+  #blad {
+    font-size: 14px;
+    margin-top: 10px;
+  }
+}
